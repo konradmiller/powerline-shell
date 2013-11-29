@@ -9,6 +9,6 @@ def add_username_segment():
         user_prompt = ' %s ' % os.getenv('USER')
 
     if os.getenv('USER') != 'kmiller':
-        powerline.append(' \\u ', Color.USERNAME_FG, Color.USERNAME_BG)
+        powerline.append(user_prompt, Color.USERNAME_FG, Color.USERNAME_BG)
 
 powerline.register( add_username_segment )

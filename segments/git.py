@@ -1,5 +1,6 @@
 import re
 import subprocess
+import os
 
 def get_git_status():
     has_pending_commits = True
@@ -27,7 +28,9 @@ def get_git_status():
 def add_git_segment():
 	try:
 		#cmd = "git branch 2> /dev/null | grep -e '\\*'"
-		p1 = subprocess.Popen(['git', 'branch', '--no-color'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                oldcwd = os.getcwd()
+                os.chdir(powerline.cwd)
+                p1 = subprocess.Popen(['git', 'branch', '--no-color'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout, stdout=subprocess.PIPE)
 		output = p2.communicate()[0].strip()
 		if not output:
@@ -46,10 +49,11 @@ def add_git_segment():
 			fg = Color.REPO_DIRTY_FG
 
 		str = u'\uE0A0 ' + branch
+                os.chdir(oldcwd)
 		powerline.append(' %s ' % str, fg, bg)
 	except OSError:
-		pass
+                os.chdir(oldcwd)
 	except subprocess.CalledProcessError:
-		pass
+                os.chdir(oldcwd)
 
 powerline.register( add_git_segment )

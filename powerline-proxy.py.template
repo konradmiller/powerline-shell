@@ -1,0 +1,30 @@
+import socket
+import os
+
+socket_name = "/tmp/python-proxy-socket"
+
+try:
+	os.remove( socket_name );
+except OSError:
+	pass
+
+s = socket.socket( socket.AF_UNIX, socket.SOCK_STREAM )
+s.bind( socket_name )
+s.listen( 1 )
+
+while True:
+	conn, addr = s.accept()
+	closed = False
+	while not closed:
+		data = conn.recv( 1024 )
+
+		if not data:
+			conn.close()
+			closed = True;
+
+                #print data, "was requested"
+                powerline.cwd = str( data ).strip()
+                conn.send( powerline.draw() )
+		conn.close()
+		closed = True;
+

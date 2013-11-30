@@ -48,6 +48,9 @@ class Powerline:
         self.separator_thin = Powerline.symbols[mode]['separator_thin']
         self.segments = []
         self.segment_functions = []
+        self.user = os.getenv('USER')
+        self.ret = 0
+        self.pid = 0
 
     def color(self, prefix, code):
         return self.color_template % ('[%s;5;%sm' % (prefix, code))

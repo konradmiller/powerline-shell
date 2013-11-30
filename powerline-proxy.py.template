@@ -1,5 +1,7 @@
 import socket
 import os
+import csv
+import StringIO
 
 socket_name = "/tmp/python-proxy-socket"
 
@@ -21,10 +23,19 @@ while True:
 		if not data:
 			conn.close()
 			closed = True;
-
-                #print data, "was requested"
-                powerline.cwd = str( data ).strip()
-                conn.send( powerline.draw() )
+                
+                f = StringIO.StringIO(data)
+                args = list(csv.reader(f, delimiter=";"))[0]
+#               print data, "was requested"
+                powerline.user = args[0]
+                powerline.pid = int(args[1])
+                powerline.ret = int(args[2])
+                powerline.shell = str(args[3]).strip()
+                powerline.cwd = str( args[4] ).strip()
+                powerline.color_template = powerline.color_templates[powerline.shell]
+		powerline.reset = powerline.color_template % '[0m'
+#                print "user=", powerline.user, " pid=", powerline.pid, " ret=", powerline.ret, " shell=", powerline.shell, " cwd=", powerline.cwd
+		conn.send( powerline.draw() )
 		conn.close()
 		closed = True;
 

@@ -1,7 +1,7 @@
 A Powerline style prompt for your shell
 =======================================
 
-A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, ZSH and Fish:
+A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, ZSH and Fish, based on [powerline-shell](https://github.com/milkbikis/powerline-shell) by Shrey Banga:
 
 ![MacVim+Solarized+Powerline+CtrlP](https://raw.github.com/milkbikis/dotfiles-mac/master/bash-powerline-screenshot.png)
 
@@ -27,7 +27,7 @@ setting your $TERM to `xterm-256color`, because that works for me.
 
 * Clone this repository somewhere:
 
-        git clone https://github.com/milkbikis/powerline-shell
+        git clone gitlab@i30git.ibds.kit.edu:konrad/powerline-proxy.git
 
 * Copy `config.py.dist` to `config.py` and edit it to configure the segments you want. Then run
 
@@ -45,6 +45,9 @@ setting your $TERM to `xterm-256color`, because that works for me.
 
         pip install argparse
 
+* Finally, start the deamon
+  	env LANG=C ~/powerline-shell.py &
+
 ### All Shells:
 There are a few optional arguments which can be seen by running `powerline-shell.py --help`.
 
@@ -61,36 +64,22 @@ There are a few optional arguments which can be seen by running `powerline-shell
 ### Bash:
 Add the following to your `.bashrc`:
 
-        function _update_ps1() {
-           export PS1="$(~/powerline-shell.py $? 2> /dev/null)"
-        }
+function _update_ps1_nc() {
+       export PS1="$(echo `whoami`";$$;$?;bash;$PWD" | nc -U /tmp/python-proxy-socket)"
+}
 
-        export PROMPT_COMMAND="_update_ps1"
+export PROMPT_COMMAND="_update_ps1_nc"
 
 ### ZSH:
-Add the following to your `.zshrc`:
-
-        function powerline_precmd() {
-          export PS1="$(~/powerline-shell.py $? --shell zsh 2> /dev/null)"
-        }
-
-        function install_powerline_precmd() {
-          for s in "${precmd_functions[@]}"; do
-            if [ "$s" = "powerline_precmd" ]; then
-              return
-            fi
-          done
-          precmd_functions+=(powerline_precmd)
-        }
-
-        install_powerline_precmd
+    *** TODO ***
 
 ### Fish:
 Redefine `fish_prompt` in ~/.config/fish/config.fish:
 
-        function fish_prompt
-            ~/powerline-shell.py $status --shell bare ^/dev/null
-        end
+function fish_prompt
+	set s $status
+	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD" | nc -U /tmp/python-proxy-socket
+end
 
 # Customization
 

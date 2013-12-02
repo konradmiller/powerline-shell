@@ -3,7 +3,7 @@ import re
 import subprocess
 
 def add_jobs_segment():
-    pppid = str(powerline.pid)
+    pppid = str(powerline.bashpid)
     output = subprocess.Popen(['ps', '-a', '-o', 'ppid'], stdout=subprocess.PIPE).communicate()[0]
     num_jobs = len(re.findall(str(pppid), output)) - 1
 

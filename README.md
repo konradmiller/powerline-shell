@@ -99,7 +99,7 @@ fi
 ```
 
 ### Fish:
-Redefine `fish_prompt` in ~/.config/fish/config.fish:
+Redefine `fish_prompt` in `~/.config/fish/config.fish`:
 
 ```
 function fish_prompt

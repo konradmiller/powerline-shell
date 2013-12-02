@@ -28,6 +28,7 @@ while True:
 
 		powerline.pid            = os.getpid()
                 args = list(csv.reader(f, delimiter=";"))[0]
+#                print data, "was requested"
                 powerline.user           = args[0]
                 powerline.bashpid        = int(args[1])
                 powerline.ret            = int(args[2])

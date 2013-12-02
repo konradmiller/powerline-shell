@@ -3,7 +3,7 @@ A Powerline style prompt for your shell
 
 A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, ZSH and Fish, based on [powerline-shell](https://github.com/milkbikis/powerline-shell) by Shrey Banga:
 
-![MacVim+Solarized+Powerline+CtrlP](https://raw.github.com/milkbikis/dotfiles-mac/master/bash-powerline-screenshot.png)
+![Powerline Screenshot](https://i30git.ibds.kit.edu/konrad/powerline-proxy/raw/master/bash-powerline-screenshot.png)
 
 *  Shows some important details about the git/svn/hg/fossil branch:
     *  Displays the current branch which changes background color when the branch is dirty
@@ -16,12 +16,9 @@ A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, Z
 
 # Setup
 
-This script uses ANSI color codes to display colors in a terminal. These are
-notoriously non-portable, so may not work for you out of the box, but try 
-setting your $TERM to `xterm-256color`, because that works for me.
+This script uses ANSI color codes to display colors in a terminal. These are notoriously non-portable, so may not work for you out of the box, but try setting your $TERM to `xterm-256color`, because that works for me.
 
 * Patch the font you use for your terminal: see https://github.com/Lokaltog/powerline-fonts
-
   * If you struggle too much to get working fonts in your terminal, you can use "compatible" mode.
   * If you're using old patched fonts, you have to use the older symbols. Basically reverse [this commit](https://github.com/milkbikis/powerline-shell/commit/2a84ecc) in your copy
 
@@ -46,32 +43,60 @@ setting your $TERM to `xterm-256color`, because that works for me.
         pip install argparse
 
 * Finally, start the deamon
-  	env LANG=C ~/powerline-shell.py &
+
+        env LANG=C ~/powerline-shell.py &
+
 
 ### All Shells:
 There are a few optional arguments which can be seen by running `powerline-shell.py --help`.
 
 ```
-  --cwd-only            Only show the current directory
-  --cwd-max-depth CWD_MAX_DEPTH
-                        Maximum number of directories to show in path
-  --colorize-hostname   Colorize the hostname based on a hash of itself.
-  --mode {patched,compatible,flat}
-                        The characters used to make separators between
-                        segments
+  --cwd-only                        Only show the current directory
+  --cwd-max-depth CWD_MAX_DEPTH     Maximum number of directories to show in path
+  --colorize-hostname               Colorize the hostname based on a hash of itself
+  --mode {patched,compatible,flat}  The characters used to make separators between segments
 ```
 
 ### Bash:
 Add the following to your `.bashrc`:
 
-function _update_ps1_nc() {
-       export PS1="$(echo `whoami`";$$;$?;bash;$PWD" | nc -U /tmp/python-proxy-socket)"
+```
+export POWERLINE_SOCKET="$HOME/.powerline-daemon-socket"
+
+_powerline_prompt() {
+	RET=$?  # save return code before calling whoami
+	PS1="$(echo $(whoami)";$$;$RET;bash;$PWD" | nc -U $POWERLINE_SOCKET) "
 }
 
-export PROMPT_COMMAND="_update_ps1_nc"
+export PROMPT_COMMAND="_powerline_prompt"
+```
 
-### ZSH:
-    *** TODO ***
+If you want to start the daemon from .bashrc add the following code above the
+previous snippet:
+
+```
+export POWERLINE_PIDFILE="$HOME/.powerline-daemon-pid"
+
+start_powerline_daemon() {
+	LANG=C setsid powerline-daemon.py &>/dev/null &
+	echo $! > $POWERLINE_PIDFILE
+	disown
+}
+
+if command_exists powerline-daemon.py; then
+	if [[ ! -f "$POWERLINE_PIDFILE" ]]; then
+		start_powerline_daemon
+	else # pidfile exists
+		ps -p $(cat "$POWERLINE_PIDFILE") &>/dev/null
+		if [[ "$?" -ne 0 ]]; then
+			# but daemon not running
+			start_powerline_daemon
+		fi
+	fi
+else
+	echo "Install powerline :)"
+fi
+```
 
 ### Fish:
 Redefine `fish_prompt` in ~/.config/fish/config.fish:
@@ -94,12 +119,12 @@ prompt immediately.
 ### Contributing new types of segments
 
 The `segments` directory contains python scripts which are injected as is into
-a single file `powerline-shell.py.template`. Each segment script defines a 
+a single file `powerline-shell.py.template`. Each segment script defines a
 function that inserts one or more segments into the prompt. If you want to add a
 new segment, simply create a new file in the segments directory and add its name
 to the `config.py` file at the appropriate location.
 
-Make sure that your script does not introduce new globals which might conflict 
+Make sure that your script does not introduce new globals which might conflict
 with other scripts. Your script should fail silently and run quickly in any
 scenario.
 

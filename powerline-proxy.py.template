@@ -6,7 +6,7 @@ import StringIO
 socket_name = os.getenv('HOME') + "/.powerline-daemon-socket"
 
 try:
-        os.remove( socket_name );
+        os.remove( socket_name )
 except OSError:
         pass
 
@@ -25,16 +25,18 @@ while True:
                         closed = True;
 
                 f = StringIO.StringIO(data)
+
                 args = list(csv.reader(f, delimiter=";"))[0]
-#                print data, "was requested"
-                powerline.user = args[0]
                 powerline.pid = int(args[1])
-                powerline.ret = int(args[2])
-                powerline.shell = str(args[3]).strip()
-                powerline.cwd = str( args[4] ).strip()
+                powerline.user           = args[0]
+                powerline.ret            = int(args[2])
+                powerline.shell          = str( args[3] ).strip()
+                powerline.cwd            = str( args[4] ).strip()
                 powerline.color_template = powerline.color_templates[powerline.shell]
-                powerline.reset = powerline.color_template % '[0m'
 #                print "user=", powerline.user, " pid=", powerline.pid, " ret=", powerline.ret, " shell=", powerline.shell, " cwd=", powerline.cwd
+                powerline.reset          = powerline.color_template % '[0m'
+
+
                 conn.send( powerline.draw() )
                 conn.close()
                 closed = True;

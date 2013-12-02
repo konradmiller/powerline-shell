@@ -36,4 +36,4 @@ def add_hg_segment():
         branch += (' ' + extra if extra != '' else '')
     return powerline.append(' %s ' % branch, fg, bg)
 
-add_hg_segment()
+powerline.register( add_hg_segment )

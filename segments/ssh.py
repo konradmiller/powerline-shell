@@ -17,4 +17,4 @@ def add_ssh_segment():
 
         powerline.append(' %s ' % str, Color.SSH_FG, Color.SSH_BG)
 
-powerline.register(add_ssh_segment)
+powerline.register( add_ssh_segment )

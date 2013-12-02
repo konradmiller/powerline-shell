@@ -50,7 +50,7 @@ class Powerline:
         self.segment_functions = []
         self.user = os.getenv('USER')
         self.ret = 0
-        self.pid = 0
+        self.bashpid = 0
 
     def color(self, prefix, code):
         return self.color_template % ('[%s;5;%sm' % (prefix, code))

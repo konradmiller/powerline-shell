@@ -28,7 +28,7 @@ while True:
                 args = list(csv.reader(f, delimiter=";"))[0]
 #                print data, "was requested"
                 powerline.user = args[0]
-                powerline.pid = int(args[1])
+                powerline.bashpid = int(args[1])
                 powerline.ret = int(args[2])
                 powerline.shell = str(args[3]).strip()
                 powerline.cwd = str( args[4] ).strip()

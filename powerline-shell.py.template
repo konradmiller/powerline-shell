@@ -84,9 +84,9 @@ class Powerline:
                 f()
                 d = datetime.datetime.now() - begin
                 results.append( d )
-            s = str( self.cwd )
+            s = str( self.cwd.strip() )
             for i,v in enumerate(results):
-                s = s + "\t" + self.segmentnames[i] + " " + str(v.microseconds) + "us"
+                s = s + (self.segmentnames[i] + ": ").rjust(17) + str(v.microseconds).rjust(4) + "us"
             logging.debug( s );
         else:
             [f() for f in self.segment_functions]
@@ -98,7 +98,7 @@ class Powerline:
         self.segment_functions.append( func )
 
         if VERBOSE == 1:
-            self.segmentnames.append( func.__name__ )
+            self.segmentnames.append( func.__name__[ 4 : len(func.__name__) - 8 ].strip() )
 
     def draw_segment(self, idx):
         segment = self.segments[idx]

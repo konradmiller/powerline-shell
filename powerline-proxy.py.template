@@ -26,7 +26,7 @@ while True:
 
                 f = StringIO.StringIO(data)
 
-		powerline.pid            = os.getpid()
+                powerline.pid            = os.getpid()
                 args = list(csv.reader(f, delimiter=";"))[0]
 #                print data, "was requested"
                 powerline.user           = args[0]

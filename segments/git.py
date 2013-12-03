@@ -26,34 +26,46 @@ def get_git_status():
 
 
 def add_git_segment():
-	try:
-		#cmd = "git branch 2> /dev/null | grep -e '\\*'"
-                oldcwd = os.getcwd()
-                os.chdir(powerline.cwd)
-                p1 = subprocess.Popen(['git', 'branch', '--no-color'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-		p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout, stdout=subprocess.PIPE)
-		output = p2.communicate()[0].strip()
-		if not output:
-			return
+    # fast path
+    oldcwd = os.getcwd()
 
-		branch = output.rstrip()[2:]
-		has_pending_commits, has_untracked_files, origin_position = get_git_status()
-		branch += origin_position
-		if has_untracked_files:
-			branch += ' +'
+    found = False
+    while os.getcwd() != '/':
+        if os.access( ".git", os.R_OK ):
+            found = True
+            break
+        os.chdir('..')
 
-		bg = Color.REPO_CLEAN_BG
-		fg = Color.REPO_CLEAN_FG
-		if has_pending_commits:
-			bg = Color.REPO_DIRTY_BG
-			fg = Color.REPO_DIRTY_FG
+    if not found:
+        return
 
-		str = u'\uE0A0 ' + branch
-                os.chdir(oldcwd)
-		powerline.append(' %s ' % str, fg, bg)
-	except OSError:
-                os.chdir(oldcwd)
-	except subprocess.CalledProcessError:
-                os.chdir(oldcwd)
+    try:
+        #cmd = "git branch 2> /dev/null | grep -e '\\*'"
+        os.chdir(powerline.cwd)
+        p1 = subprocess.Popen(['git', 'branch', '--no-color'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout, stdout=subprocess.PIPE)
+        output = p2.communicate()[0].strip()
+        if not output:
+            return
+
+        branch = output.rstrip()[2:]
+        has_pending_commits, has_untracked_files, origin_position = get_git_status()
+        branch += origin_position
+        if has_untracked_files:
+            branch += ' +'
+
+        bg = Color.REPO_CLEAN_BG
+        fg = Color.REPO_CLEAN_FG
+        if has_pending_commits:
+            bg = Color.REPO_DIRTY_BG
+            fg = Color.REPO_DIRTY_FG
+
+        str = u'\uE0A0 ' + branch
+        os.chdir(oldcwd)
+        powerline.append(' %s ' % str, fg, bg)
+    except OSError:
+        os.chdir(oldcwd)
+    except subprocess.CalledProcessError:
+        os.chdir(oldcwd)
 
 powerline.register( add_git_segment )

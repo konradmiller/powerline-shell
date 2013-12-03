@@ -42,3 +42,5 @@ while True:
                 conn.send( powerline.draw() )
                 conn.close()
                 closed = True;
+
+# vim: set filetype=python :

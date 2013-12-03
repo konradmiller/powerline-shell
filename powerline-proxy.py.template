@@ -45,3 +45,7 @@ while True:
         closed = True;
 
 # vim: set filetype=python :
+
+### Local Variables: ###
+### mode: python     ###
+### End:  	     ###

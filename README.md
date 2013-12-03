@@ -65,7 +65,8 @@ export POWERLINE_SOCKET="$HOME/.powerline-daemon-socket"
 
 _powerline_prompt() {
 	RET=$?  # save return code before calling whoami
-	PS1="$(echo $(whoami)";$$;$RET;bash;$PWD" | nc -U $POWERLINE_SOCKET) "
+	JOBS=$(($(ps -a -o ppid | grep $$ | wc -l)-1))
+	PS1="$(echo $(whoami)";$$;$RET;bash;$PWD;$JOBS" | nc -U $POWERLINE_SOCKET) "
 }
 
 export PROMPT_COMMAND="_powerline_prompt"

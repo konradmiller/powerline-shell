@@ -28,7 +28,7 @@ def get_git_status():
 def add_git_segment():
     # fast path
     oldcwd = os.getcwd()
-
+    os.chdir(powerline.cwd)
     found = False
     while os.getcwd() != '/':
         if os.access( ".git", os.R_OK ):

@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+VERBOSE=0
+
 import argparse
 import os
 import sys
+
+if VERBOSE == 1:
+    import logging
+    import datetime
+    logging.basicConfig( filename=os.getenv('HOME')+'/.powerline-daemon.log', level=logging.DEBUG)
 
 def warn(msg):
     print '[powerline-bash] ', msg
@@ -47,6 +54,7 @@ class Powerline:
         self.separator = Powerline.symbols[mode]['separator']
         self.separator_thin = Powerline.symbols[mode]['separator_thin']
         self.segments = []
+        self.segmentnames = []
         self.segment_functions = []
         self.user = os.getenv('USER')
         self.ret = 0
@@ -68,12 +76,28 @@ class Powerline:
 
     def draw(self):
         self.segments = []
-        [f() for f in self.segment_functions]
+        if VERBOSE == 1:
+            results = []
+            for f in self.segment_functions:
+                begin = datetime.datetime.now()
+                f()
+                d = datetime.datetime.now() - begin
+                results.append( d )
+            s = str( self.cwd )
+            for i,v in enumerate(results):
+                s = s + "\t" + self.segmentnames[i] + " " + str(v.microseconds) + "us"
+            logging.debug( s );
+        else:
+            [f() for f in self.segment_functions]
+
         return (''.join(self.draw_segment(i) for i in range(len(self.segments)))
                 + self.reset).encode('utf-8')
 
     def register(self, func):
         self.segment_functions.append( func )
+
+        if VERBOSE == 1:
+            self.segmentnames.append( func.__name__ )
 
     def draw_segment(self, idx):
         segment = self.segments[idx]

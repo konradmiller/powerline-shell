@@ -29,11 +29,12 @@ while True:
         powerline.pid            = os.getpid()
         args = list(csv.reader(f, delimiter=";"))[0]
 #       print data, "was requested"
-        powerline.user           = args[0]
-        powerline.bashpid        = int(args[1])
-        powerline.ret            = int(args[2])
+        powerline.user           = str( args[0] ).strip()
+        powerline.bashpid        = int( args[1] )
+        powerline.ret            = int( args[2] )
         powerline.shell          = str( args[3] ).strip()
         powerline.cwd            = str( args[4] ).strip()
+        powerline.jobs           = int( args[5] )
         powerline.color_template = powerline.color_templates[powerline.shell]
         powerline.reset          = powerline.color_template % '[0m'
 

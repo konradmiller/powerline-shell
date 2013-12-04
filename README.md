@@ -84,6 +84,8 @@ start_powerline_daemon() {
 	disown
 }
 
+command_exists () { hash "$1" &> /dev/null; }
+
 if command_exists powerline-daemon.py; then
 	if [[ ! -f "$POWERLINE_PIDFILE" ]]; then
 		start_powerline_daemon

@@ -11,7 +11,7 @@ def add_ssh_segment():
             host_prompt = ' %m '
         else:
             import socket
-            host_prompt = ' %s ' % socket.gethostname().split('.')[0]
+            host_prompt = ' %s ' % powerline.hostname
 
         str = powerline.network + host_prompt
 

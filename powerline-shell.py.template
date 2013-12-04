@@ -6,6 +6,7 @@ VERBOSE=0
 import argparse
 import os
 import sys
+import socket
 
 if VERBOSE == 1:
     import logging
@@ -61,6 +62,7 @@ class Powerline:
         self.pid = 0
         self.bashpid = 0
         self.jobs = 0
+        self.hostname = socket.gethostname().split('.')[0]
 
     def color(self, prefix, code):
         return self.color_template % ('[%s;5;%sm' % (prefix, code))

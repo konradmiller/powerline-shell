@@ -41,7 +41,7 @@ def add_git_segment():
 
     try:
         #cmd = "git branch 2> /dev/null | grep -e '\\*'"
-        os.chdir(powerline.cwd)
+#        os.chdir(powerline.cwd)
         p1 = subprocess.Popen(['git', 'branch', '--no-color'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout, stdout=subprocess.PIPE)
         output = p2.communicate()[0].strip()

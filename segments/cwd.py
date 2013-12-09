@@ -14,12 +14,16 @@ def get_short_path(cwd):
     return names
 
 def add_cwd_segment():
+    letters = False # set to True to emulate "fish" like cwd
     cwd = powerline.cwd or os.getenv('PWD')
     names = get_short_path(cwd.decode('utf-8'))
 
     max_depth = powerline.args.cwd_max_depth
     if len(names) > max_depth:
-        names = names[:2] + [u'\u2026'] + names[2 - max_depth:]
+        if letters is True:
+            names = names[:1] + [name[0:1] for name in names[1:1 - max_depth]] + names[1 - max_depth:]
+        else:
+            names = names[:1] + [u'\u2026'] + names[1 - max_depth:]
 
     if not powerline.args.cwd_only:
         for n in names[:-1]:

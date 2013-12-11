@@ -107,7 +107,7 @@ Redefine `fish_prompt` in `~/.config/fish/config.fish`:
 ```
 function fish_prompt
 	set s $status
-	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD" | nc -U /tmp/python-proxy-socket
+	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD;"(jobs -p | wc -l) | nc -U ~/.powerline-daemon-socket
 end
 ```
 

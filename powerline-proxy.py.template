@@ -15,34 +15,38 @@ s.bind( socket_name )
 s.listen( 1 )
 
 while True:
-    conn, addr = s.accept()
-    closed = False
-    while not closed:
-        data = conn.recv( 1024 )
+    try:
+        conn, addr = s.accept()
+        closed = False
+        while not closed:
+            data = conn.recv( 1024 )
 
-        if not data:
+            if not data:
+                conn.close()
+                closed = True
+
+            f = StringIO.StringIO(data)
+
+            powerline.pid            = os.getpid()
+            args = list(csv.reader(f, delimiter=";"))[0]
+    #       print data, "was requested"
+            powerline.user           = str( args[0] ).strip()
+            powerline.bashpid        = int( args[1] )
+            powerline.ret            = int( args[2] )
+            powerline.shell          = str( args[3] ).strip()
+            powerline.cwd            = str( args[4] ).strip()
+            powerline.jobs           = int( args[5] )
+            powerline.color_template = powerline.color_templates[powerline.shell]
+            powerline.reset          = powerline.color_template % '[0m'
+
+    #       print "user=",powerline.user, "powerline pid=", powerline.pid, "bash pid=",powerline.bashpid, "ret=", powerline.ret, "shell=", powerline.shell, "cwd=", powerline.cwd
+
+            conn.send( powerline.draw() )
             conn.close()
-            closed = True;
-
-        f = StringIO.StringIO(data)
-
-        powerline.pid            = os.getpid()
-        args = list(csv.reader(f, delimiter=";"))[0]
-#       print data, "was requested"
-        powerline.user           = str( args[0] ).strip()
-        powerline.bashpid        = int( args[1] )
-        powerline.ret            = int( args[2] )
-        powerline.shell          = str( args[3] ).strip()
-        powerline.cwd            = str( args[4] ).strip()
-        powerline.jobs           = int( args[5] )
-        powerline.color_template = powerline.color_templates[powerline.shell]
-        powerline.reset          = powerline.color_template % '[0m'
-
-#       print "user=",powerline.user, "powerline pid=", powerline.pid, "bash pid=",powerline.bashpid, "ret=", powerline.ret, "shell=", powerline.shell, "cwd=", powerline.cwd
-
-        conn.send( powerline.draw() )
+            closed = True
+    except:
         conn.close()
-        closed = True;
+        closed = True
 
 # vim: set filetype=python :
 

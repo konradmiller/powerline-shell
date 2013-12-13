@@ -44,6 +44,9 @@ while True:
             conn.send( powerline.draw() )
             conn.close()
             closed = True
+    except (KeyboardInterrupt, SystemExit):
+        conn.close()
+        sys.exit()
     except:
         conn.close()
         closed = True

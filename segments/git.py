@@ -2,6 +2,18 @@ import re
 import subprocess
 import os
 
+def get_valid_cwd(cwd):
+    """ We check if the current working directory is valid or not. Typically
+        happens when you checkout a different branch on git that doesn't have
+        this directory.
+        We return the longest valid prefix of the current cwd.
+    """
+    parts = cwd.split(os.sep)
+    while parts and not os.path.exists(cwd):
+        parts.pop()
+        cwd = os.sep.join(parts)
+    return cwd
+
 def get_git_status():
     has_pending_commits = True
     has_untracked_files = False
@@ -28,7 +40,7 @@ def get_git_status():
 def add_git_segment():
     # fast path
     oldcwd = os.getcwd()
-    os.chdir(powerline.cwd)
+    os.chdir(get_valid_cwd(powerline.cwd))
     found = False
     while os.getcwd() != '/':
         if os.access( ".git", os.R_OK ):

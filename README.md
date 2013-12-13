@@ -66,7 +66,7 @@ export POWERLINE_SOCKET="$HOME/.powerline-daemon-socket"
 _powerline_prompt() {
 	RET=$?  # save return code before calling whoami
 	JOBS=$(($(ps -a -o ppid | grep $$ | wc -l)-1))
-	PS1="$(echo $(whoami)";$$;$RET;bash;$PWD;$JOBS" | nc -U $POWERLINE_SOCKET) "
+	PS1="$(echo $(whoami)";$$;$RET;bash;$PWD;$JOBS;$SSH_CLIENT" | nc -U $POWERLINE_SOCKET) "
 }
 
 export PROMPT_COMMAND="_powerline_prompt"
@@ -107,7 +107,7 @@ Redefine `fish_prompt` in `~/.config/fish/config.fish`:
 ```
 function fish_prompt
 	set s $status
-	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD;"(jobs -p | wc -l) | nc -U ~/.powerline-daemon-socket
+	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD;"(jobs -p | wc -l)";$SSH_CLIENT" | nc -U ~/.powerline-daemon-socket
 end
 ```
 

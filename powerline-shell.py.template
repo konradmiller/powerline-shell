@@ -63,6 +63,7 @@ class Powerline:
         self.bashpid = 0
         self.jobs = 0
         self.hostname = socket.gethostname().split('.')[0]
+        self.ssh = False
 
     def color(self, prefix, code):
         return self.color_template % ('[%s;5;%sm' % (prefix, code))

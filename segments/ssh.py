@@ -2,7 +2,7 @@ import os
 
 def add_ssh_segment():
 
-    if os.getenv('SSH_CLIENT'):
+    if powerline.ssh:
         import socket
 
         if powerline.shell == 'bash':

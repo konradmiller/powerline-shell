@@ -36,6 +36,7 @@ while True:
             powerline.shell          = str( args[3] ).strip()
             powerline.cwd            = str( args[4] ).strip()
             powerline.jobs           = int( args[5] )
+            powerline.ssh            = ( len(args[6]) > 0 )
             powerline.color_template = powerline.color_templates[powerline.shell]
             powerline.reset          = powerline.color_template % '[0m'
 

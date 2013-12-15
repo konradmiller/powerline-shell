@@ -22,6 +22,7 @@ def add_cwd_segment():
     names = get_short_path(cwd.decode('utf-8'))
 
     max_depth = powerline.args.cwd_max_depth
+    long_names = names
     if len(names) > max_depth:
         if letters is True:
             names = names[:1] + [name[0:1] for name in names[1:1 - max_depth]] + names[1 - max_depth:]
@@ -34,10 +35,10 @@ def add_cwd_segment():
             n = names[i]
 
             # for each component, check if we still have a valid path
-            if n == '~':
+            if long_names[i] == '~':
                 path = os.getenv('HOME') # ~ is always the first element, so no need to append
             else:
-                path += os.sep + n
+                path += os.sep + long_names[i]
 
             # Background color of path segment
             if os.path.exists(path):
@@ -46,7 +47,7 @@ def add_cwd_segment():
                 col = Color.CMD_FAILED_BG
                 
             # We need a different separator if the background color changes between this segment and the next
-            if os.path.exists(path) == os.path.exists(path + os.sep + names[i + 1]):
+            if os.path.exists(path) == os.path.exists(path + os.sep + long_names[i + 1]):
                 sep = powerline.separator_thin
                 sep_col = Color.SEPARATOR_FG
             else:
@@ -59,7 +60,7 @@ def add_cwd_segment():
                 powerline.append(' %s ' % n, Color.PATH_FG, col,
                     sep, sep_col)
 
-    path += os.sep + names[-1]
+    path += os.sep + long_names[-1]
 
     if names[-1] == '~' and Color.HOME_SPECIAL_DISPLAY:
         powerline.append(' %s ' % names[-1], Color.HOME_FG, Color.HOME_BG)

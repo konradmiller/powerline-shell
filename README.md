@@ -44,7 +44,7 @@ This script uses ANSI color codes to display colors in a terminal. These are not
 
 * Finally, start the deamon
 
-        env LANG=C ~/powerline-shell.py &
+        ~/powerline-shell.py &
 
 
 ### All Shells:

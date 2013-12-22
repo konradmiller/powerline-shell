@@ -18,8 +18,10 @@ def get_git_status():
     has_pending_commits = True
     has_untracked_files = False
     origin_position = ""
+    git_env = os.environ
+    git_env["LANG"] = "en_US"
     output = subprocess.Popen(['git', 'status', '--ignore-submodules'],
-            stdout=subprocess.PIPE).communicate()[0]
+            stdout=subprocess.PIPE, env=git_env).communicate()[0]
     for line in output.split('\n'):
         origin_status = re.findall(
                 r"Your branch is (ahead|behind).*?(\d+) comm", line)

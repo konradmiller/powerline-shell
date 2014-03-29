@@ -61,7 +61,7 @@ There are a few optional arguments which can be seen by running `powerline-shell
 Add the following to your `.bashrc`:
 
 ```
-export POWERLINE_SOCKET="$HOME/.powerline-daemon-socket"
+export POWERLINE_SOCKET="$HOME/.powerline-daemon-socket-$(hostname)"
 
 _powerline_prompt() {
 	RET=$?  # save return code before calling whoami
@@ -76,7 +76,7 @@ If you want to start the daemon from `.bashrc` add the following code above the
 previous snippet:
 
 ```
-export POWERLINE_PIDFILE="$HOME/.powerline-daemon-pid"
+export POWERLINE_PIDFILE="$HOME/.powerline-daemon-pid-$(hostname)"
 
 start_powerline_daemon() {
 	LANG=C setsid powerline-daemon.py &>/dev/null &
@@ -107,7 +107,7 @@ Redefine `fish_prompt` in `~/.config/fish/config.fish`:
 ```
 function fish_prompt
 	set s $status
-	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD;"(jobs -p | wc -l)";$SSH_CLIENT" | nc -U ~/.powerline-daemon-socket
+	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD;"(jobs -p | wc -l)";$SSH_CLIENT" | nc -U ~/.powerline-daemon-socket-(hostname)
 end
 ```
 

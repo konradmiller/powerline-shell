@@ -3,7 +3,7 @@ import os
 import csv
 import StringIO
 
-socket_name = os.getenv('HOME') + "/.powerline-daemon-socket"
+socket_name = os.getenv('HOME') + "/.powerline-daemon-socket-" + powerline.hostname
 
 try:
     os.remove( socket_name )

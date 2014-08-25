@@ -2,9 +2,9 @@
 # by https://github.com/filipebarros
 
 def add_time_segment():
-    if powerline.args.shell == 'bash':
+    if powerline.shell == 'bash':
         time = ' \\t '
-    elif powerline.args.shell == 'zsh':
+    elif powerline.shell == 'zsh':
         time = ' %* '
     else:
         import time

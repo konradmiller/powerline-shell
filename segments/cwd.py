@@ -7,31 +7,73 @@ def get_short_path(cwd):
     path = ''
     for i in range(len(names)):
         path += os.sep + names[i]
-        if os.path.samefile(path, home):
-            return ['~'] + names[i+1:]
+        try:
+            if os.path.samefile(path, home):
+                return ['~'] + names[i+1:]
+        except:
+            pass
     if not names[0]:
         return ['/']
     return names
 
 def add_cwd_segment():
+    letters = False # set to True to emulate "fish" like cwd
     cwd = powerline.cwd or os.getenv('PWD')
     names = get_short_path(cwd.decode('utf-8'))
 
     max_depth = powerline.args.cwd_max_depth
+    long_names = names
     if len(names) > max_depth:
-        names = names[:2] + [u'\u2026'] + names[2 - max_depth:]
+        if letters is True:
+            names = names[:1] + [name[0:1] for name in names[1:1 - max_depth]] + names[1 - max_depth:]
+        else:
+            names = names[:1] + [u'\u2026'] + names[1 - max_depth:]
 
+    path = ''
+    len_diff = len(long_names) - len(names)
+    if len_diff > 0:
+        for i in range(len_diff):
+            if long_names[i] == '~':
+                path = os.getenv('HOME') # ~ is always the first element, so no need to append
+            else:
+                path += os.sep + long_names[i]
     if not powerline.args.cwd_only:
-        for n in names[:-1]:
+        for i in range(len(names)-1):
+            n = names[i]
+
+            # for each component, check if we still have a valid path
+            if long_names[i + len_diff] == '~':
+                path = os.getenv('HOME') # ~ is always the first element, so no need to append
+            else:
+                path += os.sep + long_names[i + len_diff]
+
+            # Background color of path segment
+            if os.path.exists(path):
+                col = Color.PATH_BG
+            else:
+                col = Color.CMD_FAILED_BG
+                
+            # We need a different separator if the background color changes between this segment and the next
+            if os.path.exists(path) == os.path.exists(path + os.sep + long_names[i + 1 + len_diff]):
+                sep = powerline.separator_thin
+                sep_col = Color.SEPARATOR_FG
+            else:
+                sep = powerline.separator
+                sep_col = Color.PATH_BG
+            
             if n == '~' and Color.HOME_SPECIAL_DISPLAY:
                 powerline.append(' %s ' % n, Color.HOME_FG, Color.HOME_BG)
             else:
-                powerline.append(' %s ' % n, Color.PATH_FG, Color.PATH_BG,
-                    powerline.separator_thin, Color.SEPARATOR_FG)
+                powerline.append(' %s ' % n, Color.PATH_FG, col,
+                    sep, sep_col)
 
+    path += os.sep + long_names[-1]
     if names[-1] == '~' and Color.HOME_SPECIAL_DISPLAY:
         powerline.append(' %s ' % names[-1], Color.HOME_FG, Color.HOME_BG)
     else:
-        powerline.append(' %s ' % names[-1], Color.CWD_FG, Color.PATH_BG)
+        if os.path.exists(path):
+            powerline.append(' %s' % names[-1], Color.CWD_FG, Color.PATH_BG)
+        else:
+            powerline.append(' %s' % names[-1], Color.CWD_FG, Color.CMD_FAILED_BG)
 
-add_cwd_segment()
+powerline.register( add_cwd_segment )

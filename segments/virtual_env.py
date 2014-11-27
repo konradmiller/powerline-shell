@@ -10,4 +10,4 @@ def add_virtual_env_segment():
     fg = Color.VIRTUAL_ENV_FG
     powerline.append(' %s ' % env_name, fg, bg)
 
-add_virtual_env_segment()
+powerline.register( add_virtual_env_segment )

@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+VERBOSE=0
+
 import argparse
 import os
 import sys
+import socket
+
+if VERBOSE == 1:
+    import logging
+    import datetime
+    logging.basicConfig( filename=os.getenv('HOME')+'/.powerline-daemon.log', level=logging.DEBUG)
 
 def warn(msg):
     print '[powerline-bash] ', msg
@@ -47,12 +55,18 @@ class Powerline:
         self.separator = Powerline.symbols[mode]['separator']
         self.separator_thin = Powerline.symbols[mode]['separator_thin']
         self.segments = []
+        self.segmentnames = []
+        self.segment_functions = []
+        self.user = os.getenv('USER')
+        self.ret = 0
+        self.pid = 0
+        self.bashpid = 0
+        self.jobs = 0
+        self.hostname = socket.gethostname().split('.')[0]
+        self.ssh = False
 
     def color(self, prefix, code):
-        if code is None:
-            return ''
-        else:
-            return self.color_template % ('[%s;5;%sm' % (prefix, code))
+        return self.color_template % ('[%s;5;%sm' % (prefix, code))
 
     def fgcolor(self, code):
         return self.color('38', code)
@@ -61,13 +75,33 @@ class Powerline:
         return self.color('48', code)
 
     def append(self, content, fg, bg, separator=None, separator_fg=None):
-        self.segments.append((content, fg, bg, 
-            separator if separator is not None else self.separator,
-            separator_fg if separator_fg is not None else bg))
+        self.segments.append((content, fg, bg, separator or self.separator,
+            separator_fg or bg))
 
     def draw(self):
+        self.segments = []
+        if VERBOSE == 1:
+            results = []
+            for f in self.segment_functions:
+                begin = datetime.datetime.now()
+                f()
+                d = datetime.datetime.now() - begin
+                results.append( d )
+            s = str( self.cwd.strip() )
+            for i,v in enumerate(results):
+                s = s + (self.segmentnames[i] + ": ").rjust(17) + str(v.microseconds).rjust(4) + "us"
+            logging.debug( s );
+        else:
+            [f() for f in self.segment_functions]
+
         return (''.join(self.draw_segment(i) for i in range(len(self.segments)))
-                + self.reset).encode('utf-8') + ' '
+                + self.reset).encode('utf-8')
+
+    def register(self, func):
+        self.segment_functions.append( func )
+
+        if VERBOSE == 1:
+            self.segmentnames.append( func.__name__[ 4 : len(func.__name__) - 8 ].strip() )
 
     def draw_segment(self, idx):
         segment = self.segments[idx]

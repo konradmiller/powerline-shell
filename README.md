@@ -1,9 +1,9 @@
 A Powerline style prompt for your shell
 =======================================
 
-A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, ZSH and Fish:
+A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, ZSH and Fish, based on [powerline-shell](https://github.com/milkbikis/powerline-shell) by Shrey Banga:
 
-![MacVim+Solarized+Powerline+CtrlP](https://raw.github.com/milkbikis/dotfiles-mac/master/bash-powerline-screenshot.png)
+![Powerline Screenshot](https://i30git.ibds.kit.edu/konrad/powerline-proxy/raw/master/bash-powerline-screenshot.png)
 
 *  Shows some important details about the git/svn/hg/fossil branch:
     *  Displays the current branch which changes background color when the branch is dirty
@@ -16,18 +16,15 @@ A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, Z
 
 # Setup
 
-This script uses ANSI color codes to display colors in a terminal. These are
-notoriously non-portable, so may not work for you out of the box, but try
-setting your $TERM to `xterm-256color`, because that works for me.
+This script uses ANSI color codes to display colors in a terminal. These are notoriously non-portable, so may not work for you out of the box, but try setting your $TERM to `xterm-256color`, because that works for me.
 
 * Patch the font you use for your terminal: see https://github.com/Lokaltog/powerline-fonts
-
   * If you struggle too much to get working fonts in your terminal, you can use "compatible" mode.
   * If you're using old patched fonts, you have to use the older symbols. Basically reverse [this commit](https://github.com/milkbikis/powerline-shell/commit/2a84ecc) in your copy
 
 * Clone this repository somewhere:
 
-        git clone https://github.com/milkbikis/powerline-shell
+        git clone gitlab@i30git.ibds.kit.edu:konrad/powerline-proxy.git
 
 * Copy `config.py.dist` to `config.py` and edit it to configure the segments you want. Then run
 
@@ -35,9 +32,9 @@ setting your $TERM to `xterm-256color`, because that works for me.
 
   * This will generate `powerline-shell.py`
 
-* (optional) Create a symlink to this python script in your home:
+* (optional) Create a symlink to this python script in your home's bin:
 
-        ln -s <path/to/powerline-shell.py> ~/powerline-shell.py
+        ln -s <path/to/powerline-shell.py> ~/bin/powerline-shell.py
 
   * If you don't want the symlink, just modify the path in the commands below
 
@@ -45,52 +42,74 @@ setting your $TERM to `xterm-256color`, because that works for me.
 
         pip install argparse
 
+* Finally, start the deamon
+
+        ~/powerline-shell.py &
+
+
 ### All Shells:
 There are a few optional arguments which can be seen by running `powerline-shell.py --help`.
 
 ```
-  --cwd-only            Only show the current directory
-  --cwd-max-depth CWD_MAX_DEPTH
-                        Maximum number of directories to show in path
-  --colorize-hostname   Colorize the hostname based on a hash of itself.
-  --mode {patched,compatible,flat}
-                        The characters used to make separators between
-                        segments
+  --cwd-only                        Only show the current directory
+  --cwd-max-depth CWD_MAX_DEPTH     Maximum number of directories to show in path
+  --colorize-hostname               Colorize the hostname based on a hash of itself
+  --mode {patched,compatible,flat}  The characters used to make separators between segments
 ```
 
 ### Bash:
 Add the following to your `.bashrc`:
 
-        function _update_ps1() {
-           export PS1="$(~/powerline-shell.py $? 2> /dev/null)"
-        }
+```
+export POWERLINE_SOCKET="$HOME/.powerline-daemon-socket-$(hostname)"
 
-        export PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+_powerline_prompt() {
+	RET=$?  # save return code before calling whoami
+	JOBS=$(($(ps -a -o ppid | grep $$ | wc -l)-1))
+	PS1="$(echo $(whoami)";$$;$RET;bash;$PWD;$JOBS;$SSH_CLIENT" | nc -U $POWERLINE_SOCKET) "
+}
 
-### ZSH:
-Add the following to your `.zshrc`:
+export PROMPT_COMMAND="_powerline_prompt"
+```
 
-        function powerline_precmd() {
-          export PS1="$(~/powerline-shell.py $? --shell zsh 2> /dev/null)"
-        }
+If you want to start the daemon from `.bashrc` add the following code above the
+previous snippet:
 
-        function install_powerline_precmd() {
-          for s in "${precmd_functions[@]}"; do
-            if [ "$s" = "powerline_precmd" ]; then
-              return
-            fi
-          done
-          precmd_functions+=(powerline_precmd)
-        }
+```
+export POWERLINE_PIDFILE="$HOME/.powerline-daemon-pid-$(hostname)"
 
-        install_powerline_precmd
+start_powerline_daemon() {
+	LANG=C setsid powerline-daemon.py &>/dev/null &
+	echo $! > $POWERLINE_PIDFILE
+	disown
+}
+
+command_exists () { hash "$1" &> /dev/null; }
+
+if command_exists powerline-daemon.py; then
+	if [[ ! -f "$POWERLINE_PIDFILE" ]]; then
+		start_powerline_daemon
+	else # pidfile exists
+		ps -p $(cat "$POWERLINE_PIDFILE") &>/dev/null
+		if [[ "$?" -ne 0 ]]; then
+			# but daemon not running
+			start_powerline_daemon
+		fi
+	fi
+else
+	echo "Install powerline :)"
+fi
+```
 
 ### Fish:
-Redefine `fish_prompt` in ~/.config/fish/config.fish:
+Redefine `fish_prompt` in `~/.config/fish/config.fish`:
 
-        function fish_prompt
-            ~/powerline-shell.py $status --shell bare ^/dev/null
-        end
+```
+function fish_prompt
+	set s $status
+	echo (whoami)";"(cut -d ' ' -f 4 /proc/self/stat)";$s;bare;$PWD;"(jobs -p | wc -l)";$SSH_CLIENT" | nc -U ~/.powerline-daemon-socket-(hostname)
+end
+```
 
 # Customization
 

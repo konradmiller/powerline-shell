@@ -1,24 +1,36 @@
 import re
 import subprocess
+import os
+
+def get_valid_cwd(cwd):
+    """ We check if the current working directory is valid or not. Typically
+        happens when you checkout a different branch on git that doesn't have
+        this directory.
+        We return the longest valid prefix of the current cwd.
+    """
+    parts = cwd.split(os.sep)
+    while parts and not os.path.exists(cwd):
+        parts.pop()
+        cwd = os.sep.join(parts)
+    return cwd
 
 def get_git_status():
     has_pending_commits = True
     has_untracked_files = False
     origin_position = ""
+    git_env = os.environ
+    git_env["LANG"] = "en_US"
     output = subprocess.Popen(['git', 'status', '--ignore-submodules'],
-            env={"LANG": "C", "HOME": os.getenv("HOME")}, stdout=subprocess.PIPE).communicate()[0]
+            stdout=subprocess.PIPE, env=git_env).communicate()[0]
     for line in output.split('\n'):
         origin_status = re.findall(
-            r"Your branch is (ahead|behind).*?(\d+) comm", line)
-        diverged_status = re.findall(r"and have (\d+) and (\d+) different commits each", line)
+                r"Your branch is (ahead|behind).*?(\d+) comm", line)
         if origin_status:
             origin_position = " %d" % int(origin_status[0][1])
             if origin_status[0][0] == 'behind':
                 origin_position += u'\u21E3'
             if origin_status[0][0] == 'ahead':
                 origin_position += u'\u21E1'
-        if diverged_status:
-            origin_position = " %d%c %d%c" % (int(diverged_status[0][0]), u'\u21E1', int(diverged_status[0][1]), u'\u21E3')
 
         if line.find('nothing to commit') >= 0:
             has_pending_commits = False
@@ -28,34 +40,46 @@ def get_git_status():
 
 
 def add_git_segment():
-    # See http://git-blame.blogspot.com/2013/06/checking-current-branch-programatically.html
-    p = subprocess.Popen(['git', 'symbolic-ref', '-q', 'HEAD'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
+    # fast path
+    oldcwd = os.getcwd()
+    os.chdir(get_valid_cwd(powerline.cwd))
+    found = False
+    while os.getcwd() != '/':
+        if os.access( ".git", os.R_OK ):
+            found = True
+            break
+        os.chdir('..')
 
-    if 'Not a git repo' in err:
+    if not found:
         return
 
-    if out:
-        branch = out[len('refs/heads/'):].rstrip()
-    else:
-        branch = '(Detached)'
+    try:
+        #cmd = "git branch 2> /dev/null | grep -e '\\*'"
+#        os.chdir(powerline.cwd)
+        p1 = subprocess.Popen(['git', 'branch', '--no-color'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p2 = subprocess.Popen(['grep', '-e', '\\*'], stdin=p1.stdout, stdout=subprocess.PIPE)
+        output = p2.communicate()[0].strip()
+        if not output:
+            return
 
-    has_pending_commits, has_untracked_files, origin_position = get_git_status()
-    branch += origin_position
-    if has_untracked_files:
-        branch += ' +'
+        branch = output.rstrip()[2:]
+        has_pending_commits, has_untracked_files, origin_position = get_git_status()
+        branch += origin_position
+        if has_untracked_files:
+            branch += ' +'
 
-    bg = Color.REPO_CLEAN_BG
-    fg = Color.REPO_CLEAN_FG
-    if has_pending_commits:
-        bg = Color.REPO_DIRTY_BG
-        fg = Color.REPO_DIRTY_FG
+        bg = Color.REPO_CLEAN_BG
+        fg = Color.REPO_CLEAN_FG
+        if has_pending_commits:
+            bg = Color.REPO_DIRTY_BG
+            fg = Color.REPO_DIRTY_FG
 
-    powerline.append(' %s ' % branch, fg, bg)
+        str = u'\uE0A0 ' + branch
+        os.chdir(oldcwd)
+        powerline.append(' %s ' % str, fg, bg)
+    except OSError:
+        os.chdir(oldcwd)
+    except subprocess.CalledProcessError:
+        os.chdir(oldcwd)
 
-try:
-    add_git_segment()
-except OSError:
-    pass
-except subprocess.CalledProcessError:
-    pass
+powerline.register( add_git_segment )

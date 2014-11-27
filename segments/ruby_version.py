@@ -14,4 +14,4 @@ def add_ruby_version_segment():
     except OSError:
         return
 
-add_ruby_version_segment()
+powerline.register( add_ruby_version_segment )

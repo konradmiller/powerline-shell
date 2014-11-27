@@ -1,14 +1,16 @@
 def add_root_indicator_segment():
     root_indicators = {
         'bash': ' \\$ ',
+    #    'bash': '',
         'zsh': ' \\$ ',
-        'bare': ' $ ',
+        'bare': ' > ',
     }
-    bg = Color.CMD_PASSED_BG
+    bg = Color.PATH_BG
+    #bg = Color.CMD_PASSED_BG
     fg = Color.CMD_PASSED_FG
-    if powerline.args.prev_error != 0:
+    if powerline.ret != 0:
         fg = Color.CMD_FAILED_FG
         bg = Color.CMD_FAILED_BG
-    powerline.append(root_indicators[powerline.args.shell], fg, bg)
+    powerline.append(root_indicators[powerline.shell], fg, bg)
 
-add_root_indicator_segment()
+powerline.register( add_root_indicator_segment )

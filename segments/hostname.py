@@ -6,7 +6,7 @@ def add_hostname_segment():
         hostname = gethostname()
         FG, BG = stringToHashToColorAndOpposite(hostname)
         FG, BG = (rgb2short(*color) for color in [FG, BG])
-        host_prompt = ' %s ' % hostname.split('.')[0]
+        host_prompt = ' %s' % hostname.split('.')[0]
 
         powerline.append(host_prompt, FG, BG)
     else:
@@ -21,4 +21,4 @@ def add_hostname_segment():
         powerline.append(host_prompt, Color.HOSTNAME_FG, Color.HOSTNAME_BG)
 
 
-add_hostname_segment()
+powerline.register( add_hostname_segment )

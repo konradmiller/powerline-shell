@@ -11,6 +11,7 @@ except ImportError:
     import config
 
 TEMPLATE_FILE = 'powerline-shell.py.template'
+PROXY_FILE = 'powerline-proxy.py.template'
 OUTPUT_FILE = 'powerline-shell.py'
 SEGMENTS_DIR = 'segments'
 THEMES_DIR = 'themes'
@@ -28,7 +29,7 @@ if __name__ == "__main__":
     source += load_source(os.path.join(THEMES_DIR, config.THEME + '.py'))
     for segment in config.SEGMENTS:
         source += load_source(os.path.join(SEGMENTS_DIR, segment + '.py'))
-    source += 'sys.stdout.write(powerline.draw())\n'
+    source += load_source(PROXY_FILE)
 
     try:
         open(OUTPUT_FILE, 'w').write(source)

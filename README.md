@@ -3,7 +3,8 @@ A Powerline style prompt for your shell
 
 A [Powerline](https://github.com/Lokaltog/vim-powerline) like prompt for Bash, ZSH and Fish, based on [powerline-shell](https://github.com/milkbikis/powerline-shell) by Shrey Banga:
 
-![Powerline Screenshot](git@github.com:konradmiller/powerline-shell-proxy/raw/master/bash-powerline-screenshot.png)
+![Powerline Screenshot](https://raw.githubusercontent.com/konradmiller/powerline-shell-proxy/master/bash-powerline-screenshot.png)
+
 
 *  Shows some important details about the git/svn/hg/fossil branch:
     *  Displays the current branch which changes background color when the branch is dirty
